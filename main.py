@@ -22,10 +22,11 @@ class WeatherAPI:
         self._weather_url = "https://api.openweathermap.org/data/2.5/weather?q={parameters}&appid={key}&units=imperial"
         self._forecast_url = 'https://api.openweathermap.org/data/2.5/forecast?q={parameters}&appid={key}&units=imperial'
         self._geo_url = 'http://api.openweathermap.org/geo/1.0/direct?q={parameters}&limit=1&appid={key}'
+        self._air_pollution_url = 'http://api.openweathermap.org/data/2.5/air_pollution?lat={lat}&lon={lon}&appid={key}'
 
     def get_weather(self, request: json) -> json:
         """
-        Returns the current weather information.
+        Returns the current weather information for specify city.
         :param request: (JSON) cityName [required], state [optional], country [optional]
         :return: JSON
         """
@@ -43,7 +44,7 @@ class WeatherAPI:
 
     def get_forecast(self, request: json) -> json:
         """
-        Returns 5-day weather forecast.
+        Returns 5-day weather forecast for specify city.
         :param request: (JSON) cityName [required], state [optional], country [optional]
         :return: JSON
         """
@@ -59,11 +60,11 @@ class WeatherAPI:
         response = requests.get(self._forecast_url.format(parameters=request_parameters, key=self._key))
         print(response.json())
 
-    def _get_lat_lon(self, request: json) -> json:
+    def _get_lat_lon(self, request: json) -> dict:
         """
-        Returns lat and lon for specify city
+        Returns lat and lon for specify city.
         :param request: (JSON) cityName [required], state [optional], country [optional]
-        :return: json
+        :return: dict
         """
         request_parsed = json.loads(request)
         request_parameters = ''
@@ -77,7 +78,21 @@ class WeatherAPI:
         response = requests.get(self._geo_url.format(parameters=request_parameters, key=self._key))
         response_parsed = response.json()[0]
 
-        return json.dumps({'lat': response_parsed['lat'], 'long': response_parsed['lon']})
+        return {'lat': response_parsed['lat'], 'lon': response_parsed['lon']}
+
+    def get_air_pollution(self, request: json) -> json:
+        """
+        Returns the air pollution data for specify city.
+        :param request: (JSON) cityName [required], state [optional], country [optional]
+        :return: json
+        """
+        request_lat_lon = self._get_lat_lon(request)
+
+        response = requests.get(
+            self._air_pollution_url.format(lat=request_lat_lon['lat'], lon=request_lat_lon['lon'], key=self._key)
+        )
+
+        print(response.json())
 
     @staticmethod
     def url_formatting(string:str) -> str:
@@ -91,4 +106,4 @@ if __name__ == '__main__':
     parameters = json.dumps({'cityName': 'san francisco'})
     # weather_api.get_weather(parameters)
     # weather_api.get_forecast(parameters)
-    print(weather_api._get_lat_lon(parameters))
+    print(weather_api.get_air_pollution(parameters))
