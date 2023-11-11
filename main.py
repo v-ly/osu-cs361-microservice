@@ -30,16 +30,9 @@ class WeatherAPI:
         :param request: (JSON) cityName [required], state [optional], country [optional]
         :return: JSON
         """
-        request_parsed = json.loads(request)
-        request_parameters = ''
-        if 'cityName' in request_parsed:
-            request_parameters = self.url_formatting(request_parsed['cityName'])
-        if 'state' in request_parsed:
-            request_parameters = self.url_formatting(request_parsed['state'])
-        if 'country' in request_parsed:
-            request_parameters = self.url_formatting(request_parsed['country'])
+        stringify_parameter = self._parameter_stringify(request)
 
-        response = requests.get(self._weather_url.format(parameters=request_parameters, key=self._key))
+        response = requests.get(self._weather_url.format(parameters=stringify_parameter, key=self._key))
         print(response.json())
 
     def get_forecast(self, request: json) -> json:
@@ -48,16 +41,9 @@ class WeatherAPI:
         :param request: (JSON) cityName [required], state [optional], country [optional]
         :return: JSON
         """
-        request_parsed = json.loads(request)
-        request_parameters = ''
-        if 'cityName' in request_parsed:
-            request_parameters = self.url_formatting(request_parsed['cityName'])
-        if 'state' in request_parsed:
-            request_parameters = self.url_formatting(request_parsed['state'])
-        if 'country' in request_parsed:
-            request_parameters = self.url_formatting(request_parsed['country'])
+        stringify_parameter = self._parameter_stringify(request)
 
-        response = requests.get(self._forecast_url.format(parameters=request_parameters, key=self._key))
+        response = requests.get(self._forecast_url.format(parameters=stringify_parameter, key=self._key))
         print(response.json())
 
     def _get_lat_lon(self, request: json) -> dict:
@@ -66,16 +52,9 @@ class WeatherAPI:
         :param request: (JSON) cityName [required], state [optional], country [optional]
         :return: dict
         """
-        request_parsed = json.loads(request)
-        request_parameters = ''
-        if 'cityName' in request_parsed:
-            request_parameters = self.url_formatting(request_parsed['cityName'])
-        if 'state' in request_parsed:
-            request_parameters = self.url_formatting(request_parsed['state'])
-        if 'country' in request_parsed:
-            request_parameters = self.url_formatting(request_parsed['country'])
+        stringify_parameter = self._parameter_stringify(request)
 
-        response = requests.get(self._geo_url.format(parameters=request_parameters, key=self._key))
+        response = requests.get(self._geo_url.format(parameters=stringify_parameter, key=self._key))
         response_parsed = response.json()[0]
 
         return {'lat': response_parsed['lat'], 'lon': response_parsed['lon']}
@@ -94,8 +73,37 @@ class WeatherAPI:
 
         print(response.json())
 
+    def _parameter_stringify(self, request: json) -> str:
+        """
+        Convert request JSON into string to fit in URL parameters.
+        :param request: JSON cityName [required], state [optional], country [optional]
+        :return: str
+        """
+
+        request_parsed = json.loads(request)
+
+        parameter = ''
+
+        if 'cityName' not in request_parsed:
+            return parameter
+        else:
+            parameter = self.url_formatting(request_parsed['cityName'])
+
+            if 'state' in request_parsed:
+                parameter = self.url_formatting(request_parsed['state'])
+
+            if 'state' in request_parsed and 'country' in request_parsed:
+                parameter = self.url_formatting(request_parsed['country'])
+
+        return parameter
+
     @staticmethod
-    def url_formatting(string:str) -> str:
+    def url_formatting(string: str) -> str:
+        """
+        Convert spaces to URL friendly format.
+        :param string: Any string.
+        :return: str
+        """
         return string.replace(' ', '%20')
 
 
@@ -103,7 +111,7 @@ if __name__ == '__main__':
 
     weather_api = WeatherAPI()
 
-    parameters = json.dumps({'cityName': 'san francisco'})
-    # weather_api.get_weather(parameters)
-    # weather_api.get_forecast(parameters)
+    parameters = json.dumps({'cityName': 'san francisco', 'state': 'california'})
+    weather_api.get_weather(parameters)
+    weather_api.get_forecast(parameters)
     print(weather_api.get_air_pollution(parameters))
