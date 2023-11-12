@@ -33,7 +33,7 @@ class WeatherAPI:
         stringify_parameter = self._parameter_stringify(request)
 
         response = requests.get(self._weather_url.format(parameters=stringify_parameter, key=self._key))
-        print(response.json())
+        return response.json()
 
     def get_forecast(self, request: json) -> json:
         """
@@ -44,7 +44,7 @@ class WeatherAPI:
         stringify_parameter = self._parameter_stringify(request)
 
         response = requests.get(self._forecast_url.format(parameters=stringify_parameter, key=self._key))
-        print(response.json())
+        return response.json()
 
     def _get_lat_lon(self, request: json) -> dict:
         """
@@ -71,7 +71,7 @@ class WeatherAPI:
             self._air_pollution_url.format(lat=request_lat_lon['lat'], lon=request_lat_lon['lon'], key=self._key)
         )
 
-        print(response.json())
+        return response.json()
 
     def _parameter_stringify(self, request: json) -> str:
         """
@@ -112,6 +112,6 @@ if __name__ == '__main__':
     weather_api = WeatherAPI()
 
     parameters = json.dumps({'cityName': 'san francisco', 'state': 'california'})
-    weather_api.get_weather(parameters)
-    weather_api.get_forecast(parameters)
+    print(weather_api.get_weather(parameters))
+    print(weather_api.get_forecast(parameters))
     print(weather_api.get_air_pollution(parameters))
