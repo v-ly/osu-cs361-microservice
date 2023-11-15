@@ -1,6 +1,7 @@
 import zmq
 import sys
 import json
+import time
 
 
 class WeatherMicroserviceClient:
@@ -35,11 +36,17 @@ if __name__ == '__main__':
     print("======================================")
     location = json.dumps({'cityName': 'seattle'})
     client.get_weather(location)
+    time.sleep(5)
+    print("======================================")
+
 
     print("======================================")
     location = json.dumps({'cityName': 'san francisco'})
     client.get_forecast(location)
+    time.sleep(5)
+    print("======================================")
 
     print("======================================")
     location = json.dumps({'cityName': 'new york'})
     client.get_air_pollution(location)
+    print("======================================")
